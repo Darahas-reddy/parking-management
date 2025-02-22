@@ -7,139 +7,96 @@
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f4f4f9;
+      background-color: #121212;
+      color: white;
       margin: 0;
       padding: 0;
-    }header, footer {
-  background-color: #2C3E50;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
-
-main {
-  padding: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-}
-
-.section {
-  width: 100%;
-  max-width: 1200px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.parking-spots {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-}
-
-.spot {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: transform 0.3s ease;
-  cursor: pointer;
-}
-
-.spot:hover { transform: scale(1.05); }
-
-.spot.reserved { background-color: #e74c3c; color: white; }
-
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.reserve-btn { background-color: #2C3E50; color: white; }
-.cancel-btn { background-color: #e74c3c; color: white; }
-
-#map { height: 400px; width: 100%; margin-top: 20px; }
-
+      text-align: center;
+    }
+    header, footer {
+      background-color: #1f1f1f;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .spot {
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      background-color: #333;
+      color: white;
+    }
+    .spot:hover { background-color: #444; }
+    .reserved { background-color: #e74c3c; color: white; }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .reserve-btn { background-color: #27ae60; color: white; }
+    .cancel-btn { background-color: #e74c3c; color: white; }
+    .qr-code { margin-top: 20px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
-<body>  <header>Smart Parking System</header>  <main>
-    <section class="section">
-      <h2>Available Parking Spots</h2>
-      <div class="parking-spots" id="parkingContainer"></div>
-    </section><section class="section">
-  <h2>Nearby Parking Locations</h2>
-  <div id="map"></div>
-  <button onclick="findNearbyParking()">Find Nearby Malls</button>
-</section>
+<body>
+  <header>Smart Parking System</header>
+  <div class="container">
+    <h2>Select Your Parking Spot</h2>
+    <div class="grid" id="parkingGrid"></div>
+    <div class="qr-code" id="qrCode"></div>
+  </div>
+  <footer>Contact: <a href="mailto:support@parkingsystem.com" style="color: white;">support@parkingsystem.com</a></footer>
+  <script>
+    const totalSpots = 10;
+    const grid = document.getElementById("parkingGrid");function loadSpots() {
+  grid.innerHTML = "";
+  for (let i = 1; i <= totalSpots; i++) {
+    const spotData = JSON.parse(localStorage.getItem("spot" + i)) || {};
+    const spot = document.createElement("div");
+    spot.classList.add("spot");
+    if (spotData.name) spot.classList.add("reserved");
+    spot.innerHTML = `Spot ${i} ${spotData.name ? "(Reserved)" : ""}`;
+    spot.onclick = () => reserveSpot(i);
+    grid.appendChild(spot);
+  }
+}
 
-  </main>  <footer>
-    <p>Contact Us: <a href="mailto:support@parkingsystem.com" style="color: white;">support@parkingsystem.com</a></p>
-  </footer>  <script>
-    const spots = 2;
+function reserveSpot(spotId) {
+  if (localStorage.getItem("spot" + spotId)) {
+    alert("Spot is already reserved.");
+    return;
+  }
+  const name = prompt("Enter your name:");
+  if (!name) return;
+  localStorage.setItem("spot" + spotId, JSON.stringify({ name }));
+  generateQRCode(spotId);
+  loadSpots();
+}
 
-    function loadSpots() {
-      const container = document.getElementById('parkingContainer');
-      container.innerHTML = '';
-      for (let i = 1; i <= spots; i++) {
-        const reservedData = JSON.parse(localStorage.getItem('spot' + i)) || {};
-        const timeRemaining = reservedData.expires ? Math.max(0, Math.floor((reservedData.expires - Date.now()) / 60000)) : 60;
-        
-        const spot = document.createElement('div');
-        spot.classList.add('spot');
-        spot.id = 'spot' + i;
-        if (reservedData.name) spot.classList.add('reserved');
-        
-        spot.innerHTML = `<p>Spot ${i}</p>
-          <div class="timer" id="timer${i}">Time remaining: ${timeRemaining}:00 minutes</div>
-          <button class="reserve-btn" onclick="reserveSpot(${i})">Reserve</button>
-          ${reservedData.name ? `<button class="cancel-btn" onclick="cancelReservation(${i})">Cancel</button>` : ''}`;
-        
-        container.appendChild(spot);
-        if (reservedData.name) startTimer(i, timeRemaining);
-      }
-    }
+function generateQRCode(spotId) {
+  document.getElementById("qrCode").innerHTML = "";
+  new QRCode(document.getElementById("qrCode"), `Spot ${spotId} Reserved`);
+}
 
-    function reserveSpot(spotId) {
-      const name = prompt("Enter your name:");
-      if (!name) return;
-      const minutes = parseInt(prompt("Enter reservation time in minutes:"), 10);
-      if (!minutes || isNaN(minutes)) return alert("Invalid time!");
-      
-      const expires = Date.now() + minutes * 60000;
-      localStorage.setItem('spot' + spotId, JSON.stringify({ name, expires }));
-      loadSpots();
-    }
+window.onload = loadSpots;
 
-    function cancelReservation(spotId) {
-      localStorage.removeItem('spot' + spotId);
-      loadSpots();
-    }
-
-    function startTimer(spotId, time) {
-      const timerElement = document.getElementById('timer' + spotId);
-      let remainingTime = time * 60;
-      
-      const countdown = setInterval(() => {
-        if (remainingTime <= 0) {
-          clearInterval(countdown);
-          cancelReservation(spotId);
-        } else {
-          remainingTime--;
-          const minutes = Math.floor(remainingTime / 60);
-          const seconds = remainingTime % 60;
-          timerElement.textContent = `Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds} minutes`;
-        }
-      }, 1000);
-    }
-
-    window.onload = loadSpots;
-  </script>  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script></body>
+  </script>
+</body>
 </html>
