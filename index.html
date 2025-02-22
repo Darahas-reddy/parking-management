@@ -5,6 +5,41 @@
     <title>Parking Management</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        #location-selector, #parking-list, #payment {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+        button, select, input {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div id="location-selector">
@@ -17,7 +52,7 @@
             <option value="Bangalore">Bangalore</option>
         </select>
         <button onclick="confirmLocation()">Confirm</button>
-    </div><div id="parking-list" style="display:none;">
+    </div><div id="parking-list">
     <h2>Available Parking Areas</h2>
     <input type="text" id="search" placeholder="Filter by name, price, or type">
     <ul id="parking-areas">
@@ -27,13 +62,27 @@
     <button onclick="proceedToBooking()">Book Slot</button>
 </div>
 
-<div id="payment" style="display:none;">
+<div id="payment">
     <h2>Payment Options</h2>
     <button>Credit Card</button>
     <button>Debit Card</button>
     <button>UPI</button>
     <button>Net Banking</button>
 </div>
+
+<script>
+    document.getElementById("location-selector").style.display = "block";
+    
+    function confirmLocation() {
+        document.getElementById("location-selector").style.display = "none";
+        document.getElementById("parking-list").style.display = "block";
+    }
+    
+    function proceedToBooking() {
+        document.getElementById("parking-list").style.display = "none";
+        document.getElementById("payment").style.display = "block";
+    }
+</script>
 
 </body>
 </html>
