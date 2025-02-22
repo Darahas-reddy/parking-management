@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book My Parking</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; text-align: center; margin: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); }
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+        .navbar { display: flex; justify-content: space-between; background: #d32f2f; padding: 15px; color: white; }
+        .navbar select, .navbar input { padding: 8px; border: none; border-radius: 5px; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); text-align: center; margin-top: 20px; }
         h1 { color: #d32f2f; }
         .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; justify-content: center; padding: 20px 0; }
         .slot { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.3s; }
@@ -14,14 +16,27 @@
         .selected { background-color: #ffeb3b; color: black; }
         .occupied { background-color: #d32f2f; color: white; pointer-events: none; }
         .input-container { margin-top: 20px; }
-        input, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; }
-        input { width: 200px; border: 1px solid #ccc; }
+        input, select, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; }
+        input, select { width: 200px; border: 1px solid #ccc; }
         button { background-color: #d32f2f; color: white; font-weight: bold; cursor: pointer; }
         button:disabled { background-color: gray; cursor: not-allowed; }
+        .payment-section { display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
 
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <select id="location">
+            <option value="new-york">New York</option>
+            <option value="los-angeles">Los Angeles</option>
+            <option value="chicago">Chicago</option>
+            <option value="houston">Houston</option>
+        </select>
+        <input type="text" id="search" placeholder="Search Parking Areas">
+    </div>
+
+    <!-- Parking Booking Section -->
     <div class="container">
         <h1>Book My Parking</h1>
         <p>Select a slot and enter your vehicle details to book your parking.</p>
@@ -30,7 +45,19 @@
 
         <div class="input-container">
             <input type="text" id="licensePlate" placeholder="Enter License Plate">
-            <button onclick="bookSlot()" id="bookBtn" disabled>Book Slot</button>
+            <button onclick="proceedToPayment()" id="bookBtn" disabled>Proceed to Payment</button>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="payment-section" id="paymentSection">
+            <h2>Payment Details</h2>
+            <select id="paymentMethod">
+                <option value="credit-card">Credit Card</option>
+                <option value="debit-card">Debit Card</option>
+                <option value="upi">UPI</option>
+                <option value="paypal">PayPal</option>
+            </select>
+            <button onclick="confirmBooking()">Confirm & Pay</button>
         </div>
     </div>
 
@@ -57,17 +84,22 @@
             document.getElementById("bookBtn").disabled = false;
         }
 
-        function bookSlot() {
+        function proceedToPayment() {
             const licensePlate = document.getElementById("licensePlate").value.trim();
             if (!selectedSlot || !licensePlate) {
                 alert("Please select a slot and enter license plate.");
                 return;
             }
+            document.getElementById("paymentSection").style.display = "block";
+        }
+
+        function confirmBooking() {
             selectedSlot.classList.replace("selected", "occupied");
             selectedSlot.innerText = "X";
             selectedSlot.onclick = null;
             document.getElementById("bookBtn").disabled = true;
-            alert(`Slot booked successfully for vehicle: ${licensePlate}`);
+            document.getElementById("paymentSection").style.display = "none";
+            alert("Payment Successful! Slot Booked.");
         }
 
         generateSlots();
