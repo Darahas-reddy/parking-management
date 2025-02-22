@@ -2,80 +2,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book My Parking</title>
-    <style>
-        /* General Styles */
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; transition: 0.3s; }
-        .dark-mode { background-color: #222; color: white; }
-        .navbar { display: flex; justify-content: space-between; background: #d32f2f; padding: 15px; color: white; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); text-align: center; margin-top: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; justify-content: center; padding: 20px 0; }
-        .slot { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-        .available { background-color: #4caf50; color: white; }
-        .selected { background-color: #ffeb3b; color: black; }
-        .occupied { background-color: #d32f2f; color: white; pointer-events: none; }
-        button { padding: 10px; margin: 5px; border-radius: 5px; border: none; background-color: #d32f2f; color: white; font-weight: bold; cursor: pointer; }
-        .qr-code { display: none; margin-top: 20px; }
-    </style>
+    <title>Parking Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <div class="navbar">
-        <select id="location">
-            <option value="ny">New York</option>
-            <option value="la">Los Angeles</option>
-            <option value="ch">Chicago</option>
+    <div id="location-selector">
+        <h2>Select Your Location</h2>
+        <button onclick="useGPS()">Use GPS</button>
+        <select id="city-select">
+            <option value="">Select City</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Bangalore">Bangalore</option>
         </select>
-        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    </div>
-    <div class="container">
-        <h1>Book My Parking</h1>
-        <p>Select a slot and enter details to book your parking.</p>
-        <div class="grid" id="parkingGrid"></div>
-        <input type="text" id="licensePlate" placeholder="Enter License Plate">
-        <input type="text" id="promoCode" placeholder="Enter Promo Code">
-        <button onclick="applyPromoCode()">Apply Promo</button>
-        <button onclick="proceedToPayment()" id="bookBtn" disabled>Proceed to Payment</button>
-        <div class="qr-code" id="qrCode">
-            <h3>Scan QR for Entry</h3>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Booking Confirmed" alt="QR Code">
-        </div>
-    </div>
-    <script>
-        let selectedSlot = null;
-        function generateSlots() {
-            const parkingGrid = document.getElementById("parkingGrid");
-            parkingGrid.innerHTML = "";
-            for (let i = 1; i <= 20; i++) {
-                const slot = document.createElement("div");
-                slot.classList.add("slot", Math.random() > 0.7 ? "occupied" : "available");
-                slot.innerText = i;
-                slot.onclick = () => selectSlot(slot, i);
-                parkingGrid.appendChild(slot);
-            }
-        }
-        function selectSlot(slot, id) {
-            if (selectedSlot) selectedSlot.classList.replace("selected", "available");
-            selectedSlot = slot;
-            selectedSlot.classList.replace("available", "selected");
-            document.getElementById("bookBtn").disabled = false;
-        }
-        function proceedToPayment() {
-            if (!selectedSlot) { alert("Please select a slot."); return; }
-            document.getElementById("qrCode").style.display = "block";
-            alert("Booking Confirmed! QR Code Generated.");
-        }
-        function applyPromoCode() {
-            let promo = document.getElementById("promoCode").value.trim();
-            if (promo === "FIRST50") {
-                alert("Promo Applied: 50% Off!");
-            } else {
-                alert("Invalid Promo Code.");
-            }
-        }
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-        }
-        window.onload = generateSlots;
-    </script>
+        <button onclick="confirmLocation()">Confirm</button>
+    </div><div id="parking-list" style="display:none;">
+    <h2>Available Parking Areas</h2>
+    <input type="text" id="search" placeholder="Filter by name, price, or type">
+    <ul id="parking-areas">
+        <li>Parking A - ₹35/hr - Covered</li>
+        <li>Parking B - ₹35/hr - Open</li>
+    </ul>
+    <button onclick="proceedToBooking()">Book Slot</button>
+</div>
+
+<div id="payment" style="display:none;">
+    <h2>Payment Options</h2>
+    <button>Credit Card</button>
+    <button>Debit Card</button>
+    <button>UPI</button>
+    <button>Net Banking</button>
+</div>
+
 </body>
 </html>
