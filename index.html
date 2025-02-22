@@ -1,114 +1,77 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Parking System</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #121212;
-      color: white;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header, footer {
-      background-color: #1f1f1f;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .spot {
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.3s;
-      background-color: #333;
-      color: white;
-    }
-    .spot:hover { background-color: #444; }
-    .reserved { background-color: #e74c3c; color: white; }
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .reserve-btn { background-color: #27ae60; color: white; }
-    .cancel-btn { background-color: #e74c3c; color: white; }
-    .qr-code { margin-top: 20px; }
-    .dark-mode-toggle { position: fixed; top: 20px; right: 20px; cursor: pointer; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book My Parking</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; text-align: center; margin: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); }
+        h1 { color: #d32f2f; }
+        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; justify-content: center; padding: 20px 0; }
+        .slot { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .available { background-color: #4caf50; color: white; }
+        .selected { background-color: #ffeb3b; color: black; }
+        .occupied { background-color: #d32f2f; color: white; pointer-events: none; }
+        .input-container { margin-top: 20px; }
+        input, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; }
+        input { width: 200px; border: 1px solid #ccc; }
+        button { background-color: #d32f2f; color: white; font-weight: bold; cursor: pointer; }
+        button:disabled { background-color: gray; cursor: not-allowed; }
+    </style>
 </head>
 <body>
-  <header>Smart Parking System <span class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</span></header>
-  <div class="container">
-    <h2>Select Your Parking Spot</h2>
-    <div class="grid" id="parkingGrid"></div>
-    <div class="qr-code" id="qrCode"></div>
-    <button onclick="processPayment()" class="reserve-btn">Proceed to Payment</button>
-  </div>
-  <footer>Contact: <a href="mailto:support@parkingsystem.com" style="color: white;">support@parkingsystem.com</a></footer>
-  <script>
-    const totalSpots = 10;
-    const grid = document.getElementById("parkingGrid");function loadSpots() {
-  grid.innerHTML = "";
-  for (let i = 1; i <= totalSpots; i++) {
-    const spotData = JSON.parse(localStorage.getItem("spot" + i)) || {};
-    const spot = document.createElement("div");
-    spot.classList.add("spot");
-    if (spotData.name) spot.classList.add("reserved");
-    spot.innerHTML = `Spot ${i} ${spotData.name ? "(Reserved)" : ""}`;
-    spot.onclick = () => reserveSpot(i);
-    grid.appendChild(spot);
-  }
-}
 
-function reserveSpot(spotId) {
-  if (localStorage.getItem("spot" + spotId)) {
-    alert("Spot is already reserved.");
-    return;
-  }
-  const name = prompt("Enter your name:");
-  if (!name) return;
-  localStorage.setItem("spot" + spotId, JSON.stringify({ name }));
-  generateQRCode(spotId);
-  loadSpots();
-}
+    <div class="container">
+        <h1>Book My Parking</h1>
+        <p>Select a slot and enter your vehicle details to book your parking.</p>
 
-function generateQRCode(spotId) {
-  document.getElementById("qrCode").innerHTML = "";
-  new QRCode(document.getElementById("qrCode"), `Spot ${spotId} Reserved`);
-}
+        <div class="grid" id="parkingGrid"></div>
 
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  document.body.style.backgroundColor = document.body.classList.contains("dark-mode") ? "#fff" : "#121212";
-  document.body.style.color = document.body.classList.contains("dark-mode") ? "#000" : "#fff";
-}
+        <div class="input-container">
+            <input type="text" id="licensePlate" placeholder="Enter License Plate">
+            <button onclick="bookSlot()" id="bookBtn" disabled>Book Slot</button>
+        </div>
+    </div>
 
-function processPayment() {
-  alert("Redirecting to payment gateway...");
-  window.location.href = "https://www.example.com/payment";
-}
+    <script>
+        const totalSlots = 20;
+        const parkingGrid = document.getElementById("parkingGrid");
+        let selectedSlot = null;
 
-window.onload = loadSpots;
+        function generateSlots() {
+            parkingGrid.innerHTML = "";
+            for (let i = 1; i <= totalSlots; i++) {
+                const slot = document.createElement("div");
+                slot.classList.add("slot", Math.random() > 0.7 ? "occupied" : "available");
+                slot.innerText = i;
+                slot.onclick = () => selectSlot(slot, i);
+                parkingGrid.appendChild(slot);
+            }
+        }
 
-  </script>
+        function selectSlot(slot, id) {
+            if (selectedSlot) selectedSlot.classList.replace("selected", "available");
+            selectedSlot = slot;
+            selectedSlot.classList.replace("available", "selected");
+            document.getElementById("bookBtn").disabled = false;
+        }
+
+        function bookSlot() {
+            const licensePlate = document.getElementById("licensePlate").value.trim();
+            if (!selectedSlot || !licensePlate) {
+                alert("Please select a slot and enter license plate.");
+                return;
+            }
+            selectedSlot.classList.replace("selected", "occupied");
+            selectedSlot.innerText = "X";
+            selectedSlot.onclick = null;
+            document.getElementById("bookBtn").disabled = true;
+            alert(`Slot booked successfully for vehicle: ${licensePlate}`);
+        }
+
+        generateSlots();
+    </script>
+
 </body>
 </html>
