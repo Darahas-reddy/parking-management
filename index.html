@@ -2,7 +2,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Smart Parking System</title>
   <style>
     body {
@@ -52,15 +51,17 @@
     .reserve-btn { background-color: #27ae60; color: white; }
     .cancel-btn { background-color: #e74c3c; color: white; }
     .qr-code { margin-top: 20px; }
+    .dark-mode-toggle { position: fixed; top: 20px; right: 20px; cursor: pointer; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
-  <header>Smart Parking System</header>
+  <header>Smart Parking System <span class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</span></header>
   <div class="container">
     <h2>Select Your Parking Spot</h2>
     <div class="grid" id="parkingGrid"></div>
     <div class="qr-code" id="qrCode"></div>
+    <button onclick="processPayment()" class="reserve-btn">Proceed to Payment</button>
   </div>
   <footer>Contact: <a href="mailto:support@parkingsystem.com" style="color: white;">support@parkingsystem.com</a></footer>
   <script>
@@ -93,6 +94,17 @@ function reserveSpot(spotId) {
 function generateQRCode(spotId) {
   document.getElementById("qrCode").innerHTML = "";
   new QRCode(document.getElementById("qrCode"), `Spot ${spotId} Reserved`);
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  document.body.style.backgroundColor = document.body.classList.contains("dark-mode") ? "#fff" : "#121212";
+  document.body.style.color = document.body.classList.contains("dark-mode") ? "#000" : "#fff";
+}
+
+function processPayment() {
+  alert("Redirecting to payment gateway...");
+  window.location.href = "https://www.example.com/payment";
 }
 
 window.onload = loadSpots;
